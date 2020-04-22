@@ -80,11 +80,9 @@ void iterateAllRandNext(node &n) {
                     tmp->level = n.level + 1;
                     for (int tmpi = 0; tmpi < n.vecs.size(); tmpi++) {
                         tmp->vecs.push_back(n.vecs[tmpi]);
-                        if (tmpi == idx) {
-                            tmp->vecs[tmpi].y1 += d;
-                            tmp->vecs[tmpi].y2 += d;
-                        }
                     }
+                    tmp->vecs[idx].y1 += directions[d];
+                    tmp->vecs[idx].y2 += directions[d];
                     n.children.push_back(tmp);
                 }
             }
@@ -111,11 +109,9 @@ void iterateAllRandNext(node &n) {
                     tmp->level = n.level + 1;
                     for (int tmpi = 0; tmpi < n.vecs.size(); tmpi++) {
                         tmp->vecs.push_back(n.vecs[tmpi]);
-                        if (tmpi == idx) {
-                            tmp->vecs[tmpi].x1 += d;
-                            tmp->vecs[tmpi].x2 += d;
-                        }
                     }
+                    tmp->vecs[idx].x1 += directions[d];
+                    tmp->vecs[idx].x2 += directions[d];
                     n.children.push_back(tmp);
                 }
             }
@@ -150,7 +146,30 @@ void setView(node &n) {
     }
 }
 
+bool isNodeEqual(node *n1, node *n2) {
+    if (n1->vecs.size() != n2->vecs.size()) {
+        return false;
+    }
+    for (int i = 0; i < n1->vecs.size(); i++) {
+        if (n1->vecs[i].direction != n2->vecs[i].direction
+            or n1->vecs[i].x1 != n2->vecs[i].x1
+            or n1->vecs[i].x2 != n2->vecs[i].x2
+            or n1->vecs[i].y1 != n2->vecs[i].y1
+            or n1->vecs[i].y2 != n2->vecs[i].y2) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void print(node &n) {
+    if (n.parent == nullptr) {
+        std::cout << "Parent : null " << std::endl;
+    } else {
+        std::cout << "Parent : " << n.parent << std::endl;
+    }
+    std::cout << "Children count : " << n.children.size() << std::endl;
     std::cout << "Current Level : " << n.level << std::endl;
     std::cout << "Vector  List  : [ ";
     for (int i = 0; i < n.vecs.size(); i++) {
@@ -171,11 +190,204 @@ void print(node &n) {
     }
 }
 
+bool isNodeExistInList(std::vector<node *> &duplist, node *n) {
+    for (int i = 0; i < duplist.size(); i++) {
+        if (isNodeEqual(duplist[i], n)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+node *findFromTopToBottom2(std::vector<node *> &duplist, int level) {
+    for (int i = 0; i < duplist.size(); i++) {
+        if (duplist[i]->level == level and duplist[i]->isDeadNode == false
+            and duplist[i]->children.size() == 0) {
+            return duplist[i];
+        }
+    }
+    return nullptr;
+}
+
+node *findFromToToBottom(node *rootNode, int level) {
+    if (rootNode->level == level) {
+        if (rootNode->isDeadNode != true
+            and rootNode->children.size() == 0) {
+            return rootNode;
+        }
+    }
+    //search level less than level
+    if (rootNode->level >= level) {
+        return nullptr;
+    }
+    for (int i = 0; i < rootNode->children.size(); i++) {
+        if (rootNode->children[i]->level < level) {
+            if (rootNode->children[i]->isDeadNode != true
+                and rootNode->children[i]->children.size() > 0) {
+                node *res = findFromToToBottom(rootNode->children[i], level);
+                if (res != nullptr) {
+                    return res;
+                }
+            }
+        } else {
+            if (rootNode->children[i]->isDeadNode != true
+                and rootNode->children[i]->children.size() == 0) {
+                return rootNode->children[i];
+            }
+        }
+    }
+    return nullptr;
+}
+
+void bfsSearch() {
+    node *root = new node;
+    std::vector<node *> duplist;
+    std::vector<node *> createdList;
+
+    //add root to duplicate list
+    duplist.push_back(root);
+    createdList.push_back(root);
+
+    root->vecs.push_back(block(0, 1, 0, 3, V, false));
+    root->vecs.push_back(block(1, 1, 1, 3, V, false));
+    root->vecs.push_back(block(2, 1, 2, 3, V, false));
+    root->vecs.push_back(block(3, 1, 3, 2, V, true));
+    root->vecs.push_back(block(5, 0, 5, 1, V, false));
+
+    root->vecs.push_back(block(2, 0, 4, 0, H, false));
+    root->vecs.push_back(block(4, 2, 5, 2, H, false));
+    root->vecs.push_back(block(3, 3, 5, 3, H, false));
+    root->vecs.push_back(block(0, 4, 1, 4, H, false));
+
+    //simplified edition
+//    root->vecs.push_back(block(0, 0, 0, 1, V, false));
+//    root->vecs.push_back(block(2, 2, 2, 3, V, false));
+//    root->vecs.push_back(block(3, 1, 3, 2, V, true));
+//    root->vecs.push_back(block(3, 3, 5, 3, H, false));
+//    root->vecs.push_back(block(2, 4, 3, 4, H, false));
+//    root->vecs.push_back(block(4, 4, 5, 4, H, false));
+    root->level = 0;
+    root->isDeadNode = false;
+    setView(*root);
+    iterateAllRandNext(*root);
+
+    //print(*root);
+
+    //add root's all child
+    for (int i = 0; i < root->children.size(); i++) {
+        setView(*root->children[i]);
+        duplist.push_back(root->children[i]);
+
+        createdList.push_back(root->children[i]);
+        //print(*root->children[i]);
+    }
+
+    int itrIdx = 0;
+    node *itrNode = root->children[itrIdx];
+    while (true) {
+        if (itrNode->isDeadNode) {
+            //unexpected case
+            std::cout << "Unexpected Dead Node , Node's Level Is " << itrNode->level << std::endl;
+            break;
+        } else if (itrNode->children.size() == 0) {
+//            //fill every children
+//            setView(*itrNode);
+//            //check node found
+//            bool isFound = false;
+//            for (int i = 0; i < RowCount; i++) {
+//                if (itrNode->CurrentView[i][3] == 1 || itrNode->CurrentView[i][3] == 2) {
+//                    isFound = true;
+//                    break;
+//                }
+//            }
+//            if (isFound == false) {
+//                std::cout << "Found " << itrNode->level << std::endl;
+//                return;
+//            }
+
+            iterateAllRandNext(*itrNode);
+            if (itrNode->children.size() <= 0) {
+                std::cout << "Iteration Fail , Node's Level Is " << itrNode->level << std::endl;
+                return;
+            }
+            std::vector<int> rmlist;
+            for (int i = 0; i < itrNode->children.size(); i++) {
+                //remove duplicated
+                if (isNodeExistInList(duplist, itrNode->children[i])) {
+                    rmlist.push_back(i);
+                }
+            }
+            int tmpsize = rmlist.size();
+            for (int j = 0; j < tmpsize; j++) {
+                delete itrNode->children[rmlist[tmpsize - 1 - j]];
+                itrNode->
+                        children.erase(itrNode->children.begin() + rmlist[tmpsize - 1 - j]);
+            }
+            if (itrNode->children.size() <= 0) {
+                //all child node has been iterated
+                itrNode->isDeadNode = true;
+            } else {
+                //add left to duplcate
+                for (int j = 0; j < itrNode->children.size(); j++) {
+                    //fill every children
+                    setView(*itrNode->children[j]);
+                    //check node found
+                    bool isFoundT = false;
+                    bool isFoundF = false;
+                    int tmpsum = 0;
+                    for (int i = RowCount - 1; i >= 0; i--) {
+                        if (itrNode->children[j]->CurrentView[i][3] == 1 || itrNode->children[j]->CurrentView[i][3] == 2) {
+                            isFoundF = true;
+                        }
+                        if (itrNode->children[j]->CurrentView[i][3] == 3) {
+                            isFoundT = true;
+                            break;
+                        }
+                    }
+                    if (isFoundT == true and isFoundF == false) {
+                        std::cout << "Found " << itrNode->level << std::endl;
+                        return;
+                    }
+                    duplist.push_back(itrNode->children[j]);
+                }
+            }
+
+            //find sibling node with level equal to itrNode
+            itrIdx++;
+            if (itrIdx >= itrNode->parent->children.size()) {
+                //node *nextNode = findFromToToBottom(root, itrNode->level);
+                node *nextNode = findFromTopToBottom2(duplist, itrNode->level);
+                if (nextNode == nullptr) {
+                    std::cout << "Level From " << itrNode->level << " Goes To " << itrNode->level + 1 << std::endl;
+                    if (itrNode->level + 1 >= 90) {
+                        return;
+                    }
+                    //nextNode = findFromToToBottom(root, itrNode->level + 1);
+                    nextNode = findFromTopToBottom2(duplist, itrNode->level + 1);
+                    if (nextNode == nullptr) {
+                        std::cout << "Error From Level " << itrNode->level << " To " << itrNode->level + 1 << std::endl;
+                        std::cout << "Duplicate Count " << duplist.size() << std::endl;
+                        print(*itrNode);
+                        return;
+                    } else {
+                        itrIdx = 0;
+                        itrNode = nextNode;
+                    }
+                } else {
+                    itrIdx = 0;
+                    itrNode = nextNode;
+                }
+            } else {
+                itrNode = itrNode->parent->children[itrIdx];
+            }
+        } else {
+            std::cout << "Unexpected Full Node , Node's Level Is " << itrNode->level << std::endl;
+            break;
+        }
+    }
+}
+
 int main() {
-    node *test = new node;
-    test->vecs.push_back(block(0, 0, 0, 1, V, false));
-    test->vecs.push_back(block(3, 3, 5, 3, H, false));
-    setView(*test);
-    print(*test);
+    bfsSearch();
     return 0;
 }
