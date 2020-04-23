@@ -5,6 +5,8 @@
 #include <random>
 #include <algorithm>
 
+#include <opencv2/opencv.hpp>
+
 #define RowCount 6
 #define ColCount 6
 
@@ -210,16 +212,16 @@ node *findFromTopToBottom2(std::vector<node *> &duplist, int level) {
 }
 
 node *findFromToToBottom(node *rootNode, int level) {
-    if (rootNode->level == level) {
-        if (rootNode->isDeadNode != true
-            and rootNode->children.size() == 0) {
-            return rootNode;
-        }
-    }
-    //search level less than level
-    if (rootNode->level >= level) {
-        return nullptr;
-    }
+//    if (rootNode->level == level) {
+//        if (rootNode->isDeadNode != true
+//            and rootNode->children.size() == 0) {
+//            return rootNode;
+//        }
+//    }
+//    //search level less than level
+//    if (rootNode->level >= level) {
+//        return nullptr;
+//    }
     for (int i = 0; i < rootNode->children.size(); i++) {
         if (rootNode->children[i]->level < level) {
             if (rootNode->children[i]->isDeadNode != true
@@ -237,6 +239,116 @@ node *findFromToToBottom(node *rootNode, int level) {
         }
     }
     return nullptr;
+}
+
+void DisplayNode(node *pnode) {
+    cv::Mat img = cv::Mat::zeros(670, 670, CV_8UC3);
+    //randu(img, cv::Scalar(0, 0, 0), cv::Scalar(255, 255, 255));
+    for (int i = 0; i < pnode->vecs.size(); i++) {
+        if (pnode->vecs[i].direction == H) {
+            //vertical
+            cv::rectangle(img,
+                          cv::Point(pnode->vecs[i].x1 * 110 + 10, pnode->vecs[i].y1 * 110 + 10),
+                          cv::Point(pnode->vecs[i].x1 * 110 + 10 +
+                                    (pnode->vecs[i].x2 - pnode->vecs[i].x1 + 1) * 100 +
+                                    (pnode->vecs[i].x2 - pnode->vecs[i].x1) * 10,
+                                    pnode->vecs[i].y1 * 110 + 10 + 100),
+                          cv::Scalar(0, 255, 0),
+                          -1);
+        } else {
+            cv::Scalar color(0, 255, 255);
+            if (pnode->vecs[i].isTarget) {
+                color = cv::Scalar(0, 0, 255);
+            }
+            cv::rectangle(img,
+                          cv::Point(pnode->vecs[i].x1 * 110 + 10, pnode->vecs[i].y1 * 110 + 10),
+                          cv::Point(pnode->vecs[i].x1 * 110 + 10 + 100,
+                                    pnode->vecs[i].y1 * 110 + 10 +
+                                    (pnode->vecs[i].y2 - pnode->vecs[i].y1 + 1) * 100 +
+                                    (pnode->vecs[i].y2 - pnode->vecs[i].y1) * 10),
+                          color,
+                          -1);
+        }
+    }
+    cv::imshow("CV Image", img);
+    if (cv::waitKey(0) >= 0) return;
+}
+
+void DisplayNode(node *pnode, node *pnode2) {
+    cv::Mat img = cv::Mat::zeros(670, 670, CV_8UC3);
+    //randu(img, cv::Scalar(0, 0, 0), cv::Scalar(255, 255, 255));
+    for (int i = 0; i < pnode->vecs.size(); i++) {
+        if (pnode->vecs[i].direction == H) {
+            //vertical
+            cv::rectangle(img,
+                          cv::Point(pnode->vecs[i].x1 * 110 + 10, pnode->vecs[i].y1 * 110 + 10),
+                          cv::Point(pnode->vecs[i].x1 * 110 + 10 +
+                                    (pnode->vecs[i].x2 - pnode->vecs[i].x1 + 1) * 100 +
+                                    (pnode->vecs[i].x2 - pnode->vecs[i].x1) * 10,
+                                    pnode->vecs[i].y1 * 110 + 10 + 100),
+                          cv::Scalar(0, 255, 0),
+                          -1);
+        } else {
+            cv::Scalar color(0, 255, 255);
+            if (pnode->vecs[i].isTarget) {
+                color = cv::Scalar(0, 0, 255);
+            }
+            cv::rectangle(img,
+                          cv::Point(pnode->vecs[i].x1 * 110 + 10, pnode->vecs[i].y1 * 110 + 10),
+                          cv::Point(pnode->vecs[i].x1 * 110 + 10 + 100,
+                                    pnode->vecs[i].y1 * 110 + 10 +
+                                    (pnode->vecs[i].y2 - pnode->vecs[i].y1 + 1) * 100 +
+                                    (pnode->vecs[i].y2 - pnode->vecs[i].y1) * 10),
+                          color,
+                          -1);
+        }
+    }
+
+    cv::Mat img2 = cv::Mat::zeros(670, 670, CV_8UC3);
+    randu(img2, cv::Scalar(0, 0, 0), cv::Scalar(255, 255, 255));
+    for (int i = 0; i < pnode2->vecs.size(); i++) {
+        if (pnode2->vecs[i].direction == H) {
+            //vertical
+            cv::rectangle(img2,
+                          cv::Point(pnode2->vecs[i].x1 * 110 + 10, pnode2->vecs[i].y1 * 110 + 10),
+                          cv::Point(pnode2->vecs[i].x1 * 110 + 10 +
+                                    (pnode2->vecs[i].x2 - pnode2->vecs[i].x1 + 1) * 100 +
+                                    (pnode2->vecs[i].x2 - pnode2->vecs[i].x1) * 10,
+                                    pnode2->vecs[i].y1 * 110 + 10 + 100),
+                          cv::Scalar(0, 255, 0),
+                          -1);
+        } else {
+            cv::Scalar color(0, 255, 255);
+            if (pnode2->vecs[i].isTarget) {
+                color = cv::Scalar(0, 0, 255);
+            }
+            cv::rectangle(img2,
+                          cv::Point(pnode2->vecs[i].x1 * 110 + 10, pnode2->vecs[i].y1 * 110 + 10),
+                          cv::Point(pnode2->vecs[i].x1 * 110 + 10 + 100,
+                                    pnode2->vecs[i].y1 * 110 + 10 +
+                                    (pnode2->vecs[i].y2 - pnode2->vecs[i].y1 + 1) * 100 +
+                                    (pnode2->vecs[i].y2 - pnode2->vecs[i].y1) * 10),
+                          color,
+                          -1);
+        }
+    }
+    cv::hconcat(img, img2, img);
+    cv::imshow("CV Image", img);
+    if (cv::waitKey(0) >= 0) return;
+}
+
+void DisplayFullTree(node *pnode) {
+    node *tmp = pnode;
+    std::vector<node *> list;
+    while (tmp->parent != nullptr) {
+        list.push_back(tmp);
+        tmp = tmp->parent;
+    }
+    list.push_back(tmp);
+    for (int i = list.size() - 1; i >= 0; i--) {
+        std::cout << "Image Level " << list[i]->level << std::endl;
+        DisplayNode(list[i]);
+    }
 }
 
 void bfsSearch() {
@@ -271,15 +383,16 @@ void bfsSearch() {
     setView(*root);
     iterateAllRandNext(*root);
 
+    //DisplayNode(root);
+
     //print(*root);
 
     //add root's all child
     for (int i = 0; i < root->children.size(); i++) {
-        setView(*root->children[i]);
         duplist.push_back(root->children[i]);
-
         createdList.push_back(root->children[i]);
         //print(*root->children[i]);
+        //DisplayNode(root->children[i]->parent, root->children[i]);
     }
 
     int itrIdx = 0;
@@ -290,20 +403,27 @@ void bfsSearch() {
             std::cout << "Unexpected Dead Node , Node's Level Is " << itrNode->level << std::endl;
             break;
         } else if (itrNode->children.size() == 0) {
-//            //fill every children
-//            setView(*itrNode);
-//            //check node found
-//            bool isFound = false;
-//            for (int i = 0; i < RowCount; i++) {
-//                if (itrNode->CurrentView[i][3] == 1 || itrNode->CurrentView[i][3] == 2) {
-//                    isFound = true;
-//                    break;
-//                }
-//            }
-//            if (isFound == false) {
-//                std::cout << "Found " << itrNode->level << std::endl;
-//                return;
-//            }
+            //fill every children
+            setView(*itrNode);
+            //check node found
+            bool isFoundT = false;
+            bool isFoundF = false;
+            for (int i = RowCount - 1; i >= 0; i--) {
+                if (itrNode->CurrentView[i][3] == 1 ||
+                    itrNode->CurrentView[i][3] == 2) {
+                    isFoundF = true;
+                }
+                if (itrNode->CurrentView[i][3] == 3) {
+                    isFoundT = true;
+                    break;
+                }
+            }
+            if (isFoundT == true and isFoundF == false) {
+                std::cout << "Found " << itrNode->level << std::endl;
+                std::cout << "duplicate list length " << duplist.size() << std::endl;
+                DisplayFullTree(itrNode);
+                return;
+            }
 
             iterateAllRandNext(*itrNode);
             if (itrNode->children.size() <= 0) {
@@ -329,57 +449,67 @@ void bfsSearch() {
             } else {
                 //add left to duplcate
                 for (int j = 0; j < itrNode->children.size(); j++) {
-                    //fill every children
-                    setView(*itrNode->children[j]);
-                    //check node found
-                    bool isFoundT = false;
-                    bool isFoundF = false;
-                    int tmpsum = 0;
-                    for (int i = RowCount - 1; i >= 0; i--) {
-                        if (itrNode->children[j]->CurrentView[i][3] == 1 || itrNode->children[j]->CurrentView[i][3] == 2) {
-                            isFoundF = true;
-                        }
-                        if (itrNode->children[j]->CurrentView[i][3] == 3) {
-                            isFoundT = true;
-                            break;
-                        }
-                    }
-                    if (isFoundT == true and isFoundF == false) {
-                        std::cout << "Found " << itrNode->level << std::endl;
-                        return;
-                    }
+//                    //fill every children
+//                    setView(*itrNode->children[j]);
+//                    //check node found
+//                    bool isFoundT = false;
+//                    bool isFoundF = false;
+//                    int tmpsum = 0;
+//                    for (int i = RowCount - 1; i >= 0; i--) {
+//                        if (itrNode->children[j]->CurrentView[i][3] == 1 ||
+//                            itrNode->children[j]->CurrentView[i][3] == 2) {
+//                            isFoundF = true;
+//                        }
+//                        if (itrNode->children[j]->CurrentView[i][3] == 3) {
+//                            isFoundT = true;
+//                            break;
+//                        }
+//                    }
+//                    if (isFoundT == true and isFoundF == false) {
+//                        std::cout << "Found " << itrNode->level << std::endl;
+//                        std::cout << "duplicate list length " << duplist.size() << std::endl;
+//
+//                        DisplayFullTree(itrNode->children[j]);
+//                        return;
+//                    }
                     duplist.push_back(itrNode->children[j]);
+                    //DisplayNode(itrNode->children[j]->parent, itrNode->children[j]);
                 }
             }
 
+//            if (itrNode->level > 4) {
+//                return;
+//            }
+
             //find sibling node with level equal to itrNode
             itrIdx++;
-            if (itrIdx >= itrNode->parent->children.size()) {
-                //node *nextNode = findFromToToBottom(root, itrNode->level);
-                node *nextNode = findFromTopToBottom2(duplist, itrNode->level);
+            //if (itrIdx >= itrNode->parent->children.size()) {
+            node *nextNode = findFromToToBottom(root, itrNode->level);
+            //node *nextNode = findFromTopToBottom2(duplist, itrNode->level);
+            if (nextNode == nullptr) {
+                std::cout << "Level From " << itrNode->level << " Goes To " << itrNode->level + 1 << std::endl;
+                if (itrNode->level + 1 >= 100) {
+                    //DisplayFullTree(itrNode);
+                    return;
+                }
+                nextNode = findFromToToBottom(root, itrNode->level + 1);
+                //nextNode = findFromTopToBottom2(duplist, itrNode->level + 1);
                 if (nextNode == nullptr) {
-                    std::cout << "Level From " << itrNode->level << " Goes To " << itrNode->level + 1 << std::endl;
-                    if (itrNode->level + 1 >= 90) {
-                        return;
-                    }
-                    //nextNode = findFromToToBottom(root, itrNode->level + 1);
-                    nextNode = findFromTopToBottom2(duplist, itrNode->level + 1);
-                    if (nextNode == nullptr) {
-                        std::cout << "Error From Level " << itrNode->level << " To " << itrNode->level + 1 << std::endl;
-                        std::cout << "Duplicate Count " << duplist.size() << std::endl;
-                        print(*itrNode);
-                        return;
-                    } else {
-                        itrIdx = 0;
-                        itrNode = nextNode;
-                    }
+                    std::cout << "Error From Level " << itrNode->level << " To " << itrNode->level + 1 << std::endl;
+                    std::cout << "Duplicate Count " << duplist.size() << std::endl;
+                    print(*itrNode);
+                    return;
                 } else {
                     itrIdx = 0;
                     itrNode = nextNode;
                 }
             } else {
-                itrNode = itrNode->parent->children[itrIdx];
+                itrIdx = 0;
+                itrNode = nextNode;
             }
+            //} else {
+            //    itrNode = itrNode->parent->children[itrIdx];
+            //}
         } else {
             std::cout << "Unexpected Full Node , Node's Level Is " << itrNode->level << std::endl;
             break;
