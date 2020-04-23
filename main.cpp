@@ -360,16 +360,17 @@ void bfsSearch() {
     duplist.push_back(root);
     createdList.push_back(root);
 
-    root->vecs.push_back(block(0, 1, 0, 3, V, false));
-    root->vecs.push_back(block(1, 1, 1, 3, V, false));
+    root->vecs.push_back(block(0, 1, 0, 2, V, false));
+    root->vecs.push_back(block(0, 4, 0, 5, V, false));
+    root->vecs.push_back(block(1, 1, 1, 2, V, false));
     root->vecs.push_back(block(2, 1, 2, 3, V, false));
-    root->vecs.push_back(block(3, 1, 3, 2, V, true));
-    root->vecs.push_back(block(5, 0, 5, 1, V, false));
+    root->vecs.push_back(block(3, 0, 3, 1, V, true));
 
-    root->vecs.push_back(block(2, 0, 4, 0, H, false));
-    root->vecs.push_back(block(4, 2, 5, 2, H, false));
-    root->vecs.push_back(block(3, 3, 5, 3, H, false));
-    root->vecs.push_back(block(0, 4, 1, 4, H, false));
+    root->vecs.push_back(block(1, 0, 2, 0, H, false));
+    root->vecs.push_back(block(3, 2, 5, 2, H, false));
+    root->vecs.push_back(block(0, 3, 1, 3, H, false));
+    root->vecs.push_back(block(3, 3, 4, 3, H, false));
+    root->vecs.push_back(block(1, 5, 3, 5, H, false));
 
     //simplified edition
 //    root->vecs.push_back(block(0, 0, 0, 1, V, false));
@@ -483,33 +484,33 @@ void bfsSearch() {
 
             //find sibling node with level equal to itrNode
             itrIdx++;
-            //if (itrIdx >= itrNode->parent->children.size()) {
-            node *nextNode = findFromToToBottom(root, itrNode->level);
-            //node *nextNode = findFromTopToBottom2(duplist, itrNode->level);
-            if (nextNode == nullptr) {
-                std::cout << "Level From " << itrNode->level << " Goes To " << itrNode->level + 1 << std::endl;
-                if (itrNode->level + 1 >= 100) {
-                    //DisplayFullTree(itrNode);
-                    return;
-                }
-                nextNode = findFromToToBottom(root, itrNode->level + 1);
-                //nextNode = findFromTopToBottom2(duplist, itrNode->level + 1);
+            if (itrIdx >= itrNode->parent->children.size()) {
+                node *nextNode = findFromToToBottom(root, itrNode->level);
+                //node *nextNode = findFromTopToBottom2(duplist, itrNode->level);
                 if (nextNode == nullptr) {
-                    std::cout << "Error From Level " << itrNode->level << " To " << itrNode->level + 1 << std::endl;
-                    std::cout << "Duplicate Count " << duplist.size() << std::endl;
-                    print(*itrNode);
-                    return;
+                    std::cout << "Level From " << itrNode->level << " Goes To " << itrNode->level + 1 << std::endl;
+                    if (itrNode->level + 1 >= 100) {
+                        //DisplayFullTree(itrNode);
+                        return;
+                    }
+                    nextNode = findFromToToBottom(root, itrNode->level + 1);
+                    //nextNode = findFromTopToBottom2(duplist, itrNode->level + 1);
+                    if (nextNode == nullptr) {
+                        std::cout << "Error From Level " << itrNode->level << " To " << itrNode->level + 1 << std::endl;
+                        std::cout << "Duplicate Count " << duplist.size() << std::endl;
+                        print(*itrNode);
+                        return;
+                    } else {
+                        itrIdx = 0;
+                        itrNode = nextNode;
+                    }
                 } else {
                     itrIdx = 0;
                     itrNode = nextNode;
                 }
             } else {
-                itrIdx = 0;
-                itrNode = nextNode;
+                itrNode = itrNode->parent->children[itrIdx];
             }
-            //} else {
-            //    itrNode = itrNode->parent->children[itrIdx];
-            //}
         } else {
             std::cout << "Unexpected Full Node , Node's Level Is " << itrNode->level << std::endl;
             break;
